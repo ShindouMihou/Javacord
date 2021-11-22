@@ -2,6 +2,7 @@ package org.javacord.core.interaction;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.javacord.api.entity.channel.TextChannel;
+import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.interaction.InteractionType;
 import org.javacord.api.interaction.SlashCommandInteraction;
@@ -16,11 +17,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class SlashCommandInteractionImpl extends InteractionImpl implements SlashCommandInteraction {
 
     private final long commandId;
     private final String commandName;
+    private final Server commandServer;
     private final List<SlashCommandInteractionOption> options;
 
     /**
@@ -61,6 +64,10 @@ public class SlashCommandInteractionImpl extends InteractionImpl implements Slas
         commandId = data.get("id").asLong();
         commandName = data.get("name").asText();
         options = new ArrayList<>();
+
+        commandServer = data.has("guild_id") ? api.getServerById(data.get("guild_id").asLong())
+                .orElseThrow(AssertionError::new) : null;
+
         if (data.has("options") && data.get("options").isArray()) {
             for (JsonNode optionJson : data.get("options")) {
                 options.add(new SlashCommandInteractionOptionImpl(api, optionJson, resolvedUsers));
@@ -91,5 +98,10 @@ public class SlashCommandInteractionImpl extends InteractionImpl implements Slas
     @Override
     public String getCommandName() {
         return commandName;
+    }
+
+    @Override
+    public Optional<Server> getCommandServer() {
+        return Optional.ofNullable(commandServer);
     }
 }

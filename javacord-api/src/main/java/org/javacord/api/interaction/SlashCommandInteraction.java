@@ -1,5 +1,9 @@
 package org.javacord.api.interaction;
 
+import org.javacord.api.entity.server.Server;
+
+import java.util.Optional;
+
 public interface SlashCommandInteraction
         extends InteractionBase, SlashCommandInteractionOptionsProvider {
     /**
@@ -22,4 +26,21 @@ public interface SlashCommandInteraction
      * @return The name of the invoked command.
      */
     String getCommandName();
+
+    /**
+     * Gets the id of server that the slash command was created for.
+     *
+     * @return The id of server that the slash command was created for.
+     */
+    default Optional<Long> getCommandServerId() {
+        return getCommandServer().map(Server::getId);
+    }
+
+
+    /**
+     * Gets the server that the slash command was created for.
+     *
+     * @return The server that the slash command was created for.
+     */
+    Optional<Server> getCommandServer();
 }
