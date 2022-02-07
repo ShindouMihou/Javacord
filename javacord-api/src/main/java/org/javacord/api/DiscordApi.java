@@ -8,9 +8,11 @@ import org.javacord.api.entity.channel.Channel;
 import org.javacord.api.entity.channel.ChannelCategory;
 import org.javacord.api.entity.channel.GroupChannel;
 import org.javacord.api.entity.channel.PrivateChannel;
+import org.javacord.api.entity.channel.RegularServerChannel;
 import org.javacord.api.entity.channel.ServerChannel;
 import org.javacord.api.entity.channel.ServerStageVoiceChannel;
 import org.javacord.api.entity.channel.ServerTextChannel;
+import org.javacord.api.entity.channel.ServerThreadChannel;
 import org.javacord.api.entity.channel.ServerVoiceChannel;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.channel.VoiceChannel;
@@ -25,21 +27,25 @@ import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.server.ServerBuilder;
 import org.javacord.api.entity.server.invite.Invite;
+import org.javacord.api.entity.sticker.Sticker;
+import org.javacord.api.entity.sticker.StickerPack;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.entity.user.UserStatus;
 import org.javacord.api.entity.webhook.IncomingWebhook;
 import org.javacord.api.entity.webhook.Webhook;
-import org.javacord.api.interaction.ServerSlashCommandPermissions;
-import org.javacord.api.interaction.ServerSlashCommandPermissionsBuilder;
+import org.javacord.api.interaction.ApplicationCommand;
+import org.javacord.api.interaction.ApplicationCommandBuilder;
+import org.javacord.api.interaction.ApplicationCommandUpdater;
+import org.javacord.api.interaction.MessageContextMenu;
+import org.javacord.api.interaction.ServerApplicationCommandPermissions;
+import org.javacord.api.interaction.ServerApplicationCommandPermissionsBuilder;
 import org.javacord.api.interaction.SlashCommand;
-import org.javacord.api.interaction.SlashCommandBuilder;
-import org.javacord.api.interaction.SlashCommandUpdater;
+import org.javacord.api.interaction.UserContextMenu;
 import org.javacord.api.listener.GloballyAttachableListenerManager;
 import org.javacord.api.util.DiscordRegexPattern;
 import org.javacord.api.util.concurrent.ThreadPool;
 import org.javacord.api.util.ratelimit.LocalRatelimiter;
 import org.javacord.api.util.ratelimit.Ratelimiter;
-
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
@@ -101,10 +107,42 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
      *
      * @return A list with all global commands.
      */
+    CompletableFuture<List<ApplicationCommand>> getGlobalApplicationCommands();
+
+    /**
+     * Gets an application command by its id.
+     *
+     * @param applicationCommandId The id of the application command.
+     * @return The application command with the given id.
+     */
+    CompletableFuture<ApplicationCommand> getGlobalApplicationCommandById(long applicationCommandId);
+
+    /**
+     * Gets a list with all application commands for the given server.
+     *
+     * @param server The server to get the application commands from.
+     * @return A list with all application commands from the server.
+     */
+    CompletableFuture<List<ApplicationCommand>> getServerApplicationCommands(Server server);
+
+    /**
+     * Gets a server application command by its id.
+     *
+     * @param server The server to get the application commands from.
+     * @param applicationCommandId The id of the server application command.
+     * @return The server application command with the given id.
+     */
+    CompletableFuture<ApplicationCommand> getServerApplicationCommandById(Server server, long applicationCommandId);
+
+    /**
+     * Gets a list with all global slash commands for the application.
+     *
+     * @return A list with all global slash commands.
+     */
     CompletableFuture<List<SlashCommand>> getGlobalSlashCommands();
 
     /**
-     * Gets an slash command by its id.
+     * Gets a slash command by its id.
      *
      * @param commandId The id of the slash command.
      * @return The slash command with the given id.
@@ -129,60 +167,125 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
     CompletableFuture<SlashCommand> getServerSlashCommandById(Server server, long commandId);
 
     /**
-     * Gets a list of all server slash command permissions from the given server.
+     * Gets a list with all global user context menus for the application.
      *
-     * @param server The server.
-     * @return A list containing the server slash command permissions.
+     * @return A list with all global user context menus.
      */
-    CompletableFuture<List<ServerSlashCommandPermissions>> getServerSlashCommandPermissions(Server server);
+    CompletableFuture<List<UserContextMenu>> getGlobalUserContextMenus();
 
     /**
-     * Gets a server slash command permissions by it ID from the given server.
+     * Gets a global user context menu by its id.
+     *
+     * @param commandId The id of the user context menu.
+     * @return The user context menu with the given id.
+     */
+    CompletableFuture<UserContextMenu> getGlobalUserContextMenuById(long commandId);
+
+    /**
+     * Gets a list with all user context menus for the given server.
+     *
+     * @param server The server to get the user context menus from.
+     * @return A list with all user context menus from the server.
+     */
+    CompletableFuture<List<UserContextMenu>> getServerUserContextMenus(Server server);
+
+    /**
+     * Gets a server user context menu by its id.
+     *
+     * @param server The server to get the user context menu from.
+     * @param commandId The id of the server user context menu.
+     * @return The server user context menu with the given id.
+     */
+    CompletableFuture<UserContextMenu> getServerUserContextMenuById(Server server, long commandId);
+
+    /**
+     * Gets a list with all global message context menus for the application.
+     *
+     * @return A list with all global message context menus.
+     */
+    CompletableFuture<List<MessageContextMenu>> getGlobalMessageContextMenus();
+
+    /**
+     * Gets a global message context menu by its id.
+     *
+     * @param commandId The id of the message context menu.
+     * @return The message context menu with the given id.
+     */
+    CompletableFuture<MessageContextMenu> getGlobalMessageContextMenuById(long commandId);
+
+    /**
+     * Gets a list with all message context menus for the given server.
+     *
+     * @param server The server to get the message context menus from.
+     * @return A list with all message context menus from the server.
+     */
+    CompletableFuture<List<MessageContextMenu>> getServerMessageContextMenus(Server server);
+
+    /**
+     * Gets a server message context menu by its id.
+     *
+     * @param server The server to get the message context menu from.
+     * @param commandId The id of the server message context menu.
+     * @return The server message context menu with the given id.
+     */
+    CompletableFuture<MessageContextMenu> getServerMessageContextMenuById(Server server, long commandId);
+
+    /**
+     * Gets a list of all server application command permissions from the given server.
+     *
+     * @param server The server.
+     * @return A list containing the server application command permissions.
+     */
+    CompletableFuture<List<ServerApplicationCommandPermissions>> getServerApplicationCommandPermissions(Server server);
+
+    /**
+     * Gets a server application command permissions by it ID from the given server.
      *
      * @param server The server.
      * @param commandId The command ID.
-     * @return The server slash command permissions for the given ID.
+     * @return The server application command permissions for the given ID.
      */
-    CompletableFuture<ServerSlashCommandPermissions> getServerSlashCommandPermissionsById(
+    CompletableFuture<ServerApplicationCommandPermissions> getServerApplicationCommandPermissionsById(
             Server server, long commandId);
 
     /**
-     * Updates multiple server slash command permissions at once.
+     * Updates multiple server application command permissions at once.
      *
-     * @param server The server where the slash command permissions should be updated on.
-     * @param slashCommandPermissionsBuilders The slash command permissions builders,
+     * @param server The server where the application command permissions should be updated on.
+     * @param applicationCommandPermissionsBuilders The application command permissions builders,
      *     which should be updated.
-     * @return A list of the updated server slash command permissions.
+     * @return A list of the updated server application command permissions.
      */
-    CompletableFuture<List<ServerSlashCommandPermissions>> batchUpdateSlashCommandPermissions(
-            Server server, List<ServerSlashCommandPermissionsBuilder> slashCommandPermissionsBuilders);
+    CompletableFuture<List<ServerApplicationCommandPermissions>> batchUpdateApplicationCommandPermissions(
+            Server server, List<ServerApplicationCommandPermissionsBuilder> applicationCommandPermissionsBuilders);
 
     /**
-     * Bulk overwrites the global slash commands.
+     * Bulk overwrites the global application commands.
      * This should be preferably used when updating and/or creating multiple
-     * slash commands at once instead of {@link SlashCommandUpdater#updateGlobal(DiscordApi)} (DiscordApi)}
-     * and {@link SlashCommandBuilder#createGlobal(DiscordApi)}
+     * application commands at once instead of {@link ApplicationCommandUpdater#updateGlobal(DiscordApi)}
+     * and {@link ApplicationCommandBuilder#createGlobal(DiscordApi)}
      *
-     * @param slashCommandBuilderList A list containing the SlashCommandBuilders
-     *     which should should be used to perform the bulk overwrite.
-     * @return A list containing all slash commands.
+     * @param applicationCommandBuilderList A list containing the ApplicationCommandBuilders
+     *                                      which should be used to perform the bulk overwrite.
+     * @return A list containing all application commands.
      */
-    CompletableFuture<List<SlashCommand>> bulkOverwriteGlobalSlashCommands(
-            List<SlashCommandBuilder> slashCommandBuilderList);
+    CompletableFuture<List<ApplicationCommand>> bulkOverwriteGlobalApplicationCommands(
+            List<? extends ApplicationCommandBuilder<?, ?, ?>> applicationCommandBuilderList);
 
     /**
-     * Bulk overwrites the servers slash commands.
+     * Bulk overwrites the servers application commands.
      * This should be preferably used when updating and/or creating multiple
-     * slash commands at once instead of {@link SlashCommandUpdater#updateForServer(Server)} (Server)}
-     * and {@link SlashCommandBuilder#createForServer(Server)}
+     * application commands at once instead of {@link ApplicationCommandUpdater#updateForServer(Server)}
+     * and {@link ApplicationCommandBuilder#createForServer(Server)}
      *
-     * @param slashCommandBuilderList A list containing the SlashCommandBuilders.
-     * @param server The server where the bulk overwrite should be performed on
-     *     which should should be used to perform the bulk overwrite.
-     * @return A list containing all slash commands.
+     * @param applicationCommandBuilderList A list containing the ApplicationCommandBuilders.
+     * @param server                        The server where the bulk overwrite should be performed on
+     *                                      which should be used to perform the bulk overwrite.
+     * @return A list containing all application commands.
      */
-    CompletableFuture<List<SlashCommand>> bulkOverwriteServerSlashCommands(
-            Server server, List<SlashCommandBuilder> slashCommandBuilderList);
+    CompletableFuture<List<ApplicationCommand>> bulkOverwriteServerApplicationCommands(
+            Server server,
+            List<? extends ApplicationCommandBuilder<?, ?, ?>> applicationCommandBuilderList);
 
     /**
      * Gets a utility class to interact with uncached messages.
@@ -265,7 +368,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
     CompletableFuture<Duration> measureRestLatency();
 
     /**
-     * Creates an invite link for the this bot.
+     * Creates an invite link for this bot.
      * The method only works for bot accounts!
      *
      * @return An invite link for this bot.
@@ -276,7 +379,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
     }
 
     /**
-     * Creates an invite link for the this bot.
+     * Creates an invite link for this bot.
      * The method only works for bot accounts!
      *
      * @param permissions The permissions which should be granted to the bot.
@@ -289,7 +392,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Sets the cache size of all caches.
-     * This settings are applied on a per-channel basis.
+     * These settings are applied on a per-channel basis.
      * It overrides all previous settings, so it's recommended to directly set it after logging in, if you want to
      * change some channel specific cache settings, too.
      * Please notice that the cache is cleared only once every minute!
@@ -450,15 +553,17 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
     /**
      * Disconnects the bot.
      * After disconnecting you should NOT use this instance again.
+     *
+     * @return A future that completes once the disconnect is finished.
      */
-    void disconnect();
+    CompletableFuture<Void> disconnect();
 
     /**
      * Sets a function which is used to get the delay between reconnects.
      *
-     * @param reconnectDelayProvider A function which get's the amount of reconnects (starting with <code>1</code>) as
+     * @param reconnectDelayProvider A function which gets the amount of reconnects (starting with <code>1</code>) as
      *                               the parameter and should return the delay in seconds to wait for the next reconnect
-     *                               attempt. By default the function reconnect delay is calculated using the following
+     *                               attempt. By default, the function reconnect delay is calculated using the following
      *                               equation: <code>f(x): (x^1.5-(1/(1/(0.1*x)+1))*x^1.5)+(currentShard*6)</code>.
      *                               This would result in a delay which looks like this for a bot with 1 shard:
      *                               <table>
@@ -594,7 +699,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
      * Updates the username of the current account.
      *
      * <p>If you want to update several settings at once, it's recommended to use the
-     * {@link AccountUpdater} from {@link #createAccountUpdater()} ()} which provides a better performance!
+     * {@link AccountUpdater} from {@link #createAccountUpdater()} which provides a better performance!
      *
      * @param username The new username.
      * @return A future to check if the update was successful.
@@ -608,7 +713,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
      * This method assumes the file type is "png"!
      *
      * <p>If you want to update several settings at once, it's recommended to use the
-     * {@link AccountUpdater} from {@link #createAccountUpdater()} ()} which provides a better performance!
+     * {@link AccountUpdater} from {@link #createAccountUpdater()} which provides a better performance!
      *
      * @param avatar The new avatar.
      * @return A future to check if the update was successful.
@@ -621,7 +726,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
      * Updates the avatar of the current account.
      *
      * <p>If you want to update several settings at once, it's recommended to use the
-     * {@link AccountUpdater} from {@link #createAccountUpdater()} ()} which provides a better performance!
+     * {@link AccountUpdater} from {@link #createAccountUpdater()} which provides a better performance!
      *
      * @param avatar The new avatar.
      * @param fileType The type of the avatar, e.g. "png" or "jpg".
@@ -635,7 +740,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
      * Updates the avatar of the current account.
      *
      * <p>If you want to update several settings at once, it's recommended to use the
-     * {@link AccountUpdater} from {@link #createAccountUpdater()} ()} which provides a better performance!
+     * {@link AccountUpdater} from {@link #createAccountUpdater()} which provides a better performance!
      *
      * @param avatar The new avatar.
      * @return A future to check if the update was successful.
@@ -648,7 +753,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
      * Updates the avatar of the current account.
      *
      * <p>If you want to update several settings at once, it's recommended to use the
-     * {@link AccountUpdater} from {@link #createAccountUpdater()} ()} which provides a better performance!
+     * {@link AccountUpdater} from {@link #createAccountUpdater()} which provides a better performance!
      *
      * @param avatar The new avatar.
      * @return A future to check if the update was successful.
@@ -661,7 +766,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
      * Updates the avatar of the current account.
      *
      * <p>If you want to update several settings at once, it's recommended to use the
-     * {@link AccountUpdater} from {@link #createAccountUpdater()} ()} which provides a better performance!
+     * {@link AccountUpdater} from {@link #createAccountUpdater()} which provides a better performance!
      *
      * @param avatar The new avatar.
      * @return A future to check if the update was successful.
@@ -675,7 +780,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
      * This method assumes the file type is "png"!
      *
      * <p>If you want to update several settings at once, it's recommended to use the
-     * {@link AccountUpdater} from {@link #createAccountUpdater()} ()} which provides a better performance!
+     * {@link AccountUpdater} from {@link #createAccountUpdater()} which provides a better performance!
      *
      * @param avatar The new avatar.
      * @return A future to check if the update was successful.
@@ -688,7 +793,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
      * Updates the avatar of the current account.
      *
      * <p>If you want to update several settings at once, it's recommended to use the
-     * {@link AccountUpdater} from {@link #createAccountUpdater()} ()} which provides a better performance!
+     * {@link AccountUpdater} from {@link #createAccountUpdater()} which provides a better performance!
      *
      * @param avatar The new avatar.
      * @param fileType The type of the avatar, e.g. "png" or "jpg".
@@ -703,7 +808,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
      * This method assumes the file type is "png"!
      *
      * <p>If you want to update several settings at once, it's recommended to use the
-     * {@link AccountUpdater} from {@link #createAccountUpdater()} ()} which provides a better performance!
+     * {@link AccountUpdater} from {@link #createAccountUpdater()} which provides a better performance!
      *
      * @param avatar The new avatar.
      * @return A future to check if the update was successful.
@@ -716,7 +821,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
      * Updates the avatar of the current account.
      *
      * <p>If you want to update several settings at once, it's recommended to use the
-     * {@link AccountUpdater} from {@link #createAccountUpdater()} ()} which provides a better performance!
+     * {@link AccountUpdater} from {@link #createAccountUpdater()} which provides a better performance!
      *
      * @param avatar The new avatar.
      * @param fileType The type of the avatar, e.g. "png" or "jpg".
@@ -729,14 +834,14 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
     /**
      * Checks if the user cache is enabled.
      *
-     * @return Whether or not the user cache is enabled;
+     * @return Whether the user cache is enabled;
      */
     boolean isUserCacheEnabled();
 
     /**
      * Checks if all users of available servers are in the cache.
      *
-     * @return Whether or not all users of available servers are in the cache.
+     * @return Whether all users of available servers are in the cache.
      */
     default boolean hasAllUsersInCache() {
         return !getServers().stream().anyMatch(Server::hasAllMembersInCache);
@@ -874,8 +979,8 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
     }
 
     /**
-     * Gets a user by its discriminated name like e. g. {@code Bastian#8222}.
-     * This method is case sensitive!
+     * Gets a user by its discriminated name like e.g. {@code Bastian#8222}.
+     * This method is case-sensitive!
      *
      * @param discriminatedName The discriminated name of the user.
      * @return The user with the given discriminated name.
@@ -886,8 +991,8 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
     }
 
     /**
-     * Gets a user by its discriminated name like e. g. {@code Bastian#8222}.
-     * This method is case insensitive!
+     * Gets a user by its discriminated name like e.g. {@code Bastian#8222}.
+     * This method is case-insensitive!
      *
      * @param discriminatedName The discriminated name of the user.
      * @return The user with the given discriminated name.
@@ -899,7 +1004,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a user by its name and discriminator.
-     * This method is case sensitive!
+     * This method is case-sensitive!
      *
      * @param name The name of the user.
      * @param discriminator The discriminator of the user.
@@ -913,7 +1018,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a user by its name and discriminator.
-     * This method is case insensitive!
+     * This method is case-insensitive!
      *
      * @param name The name of the user.
      * @param discriminator The discriminator of the user.
@@ -927,7 +1032,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all users with the given name.
-     * This method is case sensitive!
+     * This method is case-sensitive!
      *
      * @param name The name of the users.
      * @return A collection with all users with the given name.
@@ -941,7 +1046,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all users with the given name.
-     * This method is case insensitive!
+     * This method is case-insensitive!
      *
      * @param name The name of the users.
      * @return A collection with all users with the given name.
@@ -955,7 +1060,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all users with the given nickname on the given server.
-     * This method is case sensitive!
+     * This method is case-sensitive!
      *
      * @param nickname The nickname of the users.
      * @param server The server where to lookup the nickname.
@@ -970,7 +1075,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all users with the given nickname on the given server.
-     * This method is case insensitive!
+     * This method is case-insensitive!
      *
      * @param nickname The nickname of the users.
      * @param server The server where to lookup the nickname.
@@ -985,7 +1090,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all users with the given display name on the given server.
-     * This method is case sensitive!
+     * This method is case-sensitive!
      *
      * @param displayName The display name of the users.
      * @param server The server where to lookup the display name.
@@ -1000,7 +1105,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all users with the given display name on the given server.
-     * This method is case insensitive!
+     * This method is case-insensitive!
      *
      * @param displayName The display name of the users.
      * @param server The server where to lookup the display name.
@@ -1137,7 +1242,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all servers with the given name.
-     * This method is case sensitive!
+     * This method is case-sensitive!
      *
      * @param name The name of the servers.
      * @return A collection with all servers with the given name.
@@ -1151,7 +1256,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all servers with the given name.
-     * This method is case insensitive!
+     * This method is case-insensitive!
      *
      * @param name The name of the servers.
      * @return A collection with all servers with the given name.
@@ -1196,7 +1301,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all custom emojis with the given name in the server.
-     * This method is case sensitive!
+     * This method is case-sensitive!
      *
      * @param name The name of the custom emojis.
      * @return A collection with all custom emojis with the given name in this server.
@@ -1210,7 +1315,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all custom emojis with the given name in the server.
-     * This method is case insensitive!
+     * This method is case-insensitive!
      *
      * @param name The name of the custom emojis.
      * @return A collection with all custom emojis with the given name in this server.
@@ -1220,6 +1325,71 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
                 getCustomEmojis().stream()
                         .filter(emoji -> emoji.getName().equalsIgnoreCase(name))
                         .collect(Collectors.toList()));
+    }
+
+    /**
+     * Creates or gets a custom emoji to be used in other Javacord APIs. Use this if the custom emoji you're looking
+     * for is hosted on a different shard, and can't be accessed through {@code getCustomEmojiById()}.
+     * If the custom emoji is known, the method will return the known custom emoji instead of creating a new one.
+     * The method will always return a non-null value, even if the emoji does not exist which will lead to a
+     * non-functional custom emoji for further usage.
+     *
+     * @param id the ID of the custom emoji
+     * @param name the name of the custom emoji
+     * @param animated true if the emoji is animated; false otherwise
+     * @return the new (unknown) custom emoji instance
+     */
+    CustomEmoji getKnownCustomEmojiOrCreateCustomEmoji(long id, String name, boolean animated);
+
+    /**
+     * Gets a list of all default sticker packs, which are available to nitro users.
+     *
+     * @return The nitro packs available to nitro users.
+     */
+    CompletableFuture<Set<StickerPack>> getNitroStickerPacks();
+
+    /**
+     * Gets a sticker by its ID.
+     *
+     * @param id The ID of the sticker.
+     * @return A future of the sticker.
+     */
+    Optional<Sticker> getStickerById(long id);
+
+    /**
+     * Gets a sticker by its ID.
+     *
+     * @param id The ID of the sticker.
+     * @return A future of the sticker.
+     */
+    default Optional<Sticker> getStickerById(String id) {
+        try {
+            return getStickerById(Long.parseLong(id));
+        } catch (NumberFormatException exception) {
+            throw new IllegalArgumentException("The id must be a number!");
+        }
+    }
+
+    /**
+     * Requests a sticker by its ID from the Discord API.
+     *
+     * @param id The ID of the sticker to request.
+     * @return A future of the sticker.
+     */
+    CompletableFuture<Sticker> requestStickerById(long id);
+
+    /**
+     * Requests a sticker by its ID from the Discord API.
+     *
+     * @param id The ID of the sticker to request.
+     * @return A future of the sticker.
+     */
+    default CompletableFuture<Sticker> requestStickerById(String id) {
+        try {
+            return requestStickerById(Long.parseLong(id));
+        } catch (NumberFormatException exception) {
+            throw new IllegalArgumentException("The ID must be a number!");
+        }
     }
 
     /**
@@ -1263,7 +1433,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all roles with the given name.
-     * This method is case sensitive!
+     * This method is case-sensitive!
      *
      * @param name The name of the roles.
      * @return A collection with all roles with the given name.
@@ -1277,7 +1447,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all roles with the given name.
-     * This method is case insensitive!
+     * This method is case-insensitive!
      *
      * @param name The name of the roles.
      * @return A collection with all roles with the given name.
@@ -1318,6 +1488,13 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
     Collection<ServerChannel> getServerChannels();
 
     /**
+     * Gets a collection with all regular server channels of the bot.
+     *
+     * @return A collection with all regular server channels of the bot.
+     */
+    Collection<RegularServerChannel> getRegularServerChannels();
+
+    /**
      * Gets a collection with all channel categories of the bot.
      *
      * @return A collection with all channel categories of the bot.
@@ -1330,6 +1507,27 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
      * @return A collection with all server text channels of the bot.
      */
     Collection<ServerTextChannel> getServerTextChannels();
+
+    /**
+     * Gets a set with all the server thread channels of the bot.
+     *
+     * @return A set with all server thread channels of the bot.
+     */
+    Set<ServerThreadChannel> getServerThreadChannels();
+
+    /**
+     * Gets a set with all the private threads of the bot.
+     *
+     * @return A set with all private threads of the bot.
+     */
+    Set<ServerThreadChannel> getPrivateServerThreadChannels();
+
+    /**
+     * Gets a set with all the public threads of the bot.
+     *
+     * @return A set with all the public threads of the bot.
+     */
+    Set<ServerThreadChannel> getPublicServerThreadChannels();
 
     /**
      * Gets a collection with all server voice channels of the bot.
@@ -1383,7 +1581,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all channels with the given name.
-     * This method is case sensitive!
+     * This method is case-sensitive!
      *
      * @param name The name of the channels. Can be <code>null</code> to search for group channels without name.
      * @return A collection with all channels with the given name.
@@ -1397,7 +1595,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all channels with the given name.
-     * This method is case insensitive!
+     * This method is case-insensitive!
      *
      * @param name The name of the channels. Can be <code>null</code> to search for group channels without name.
      * @return A collection with all channels with the given name.
@@ -1435,7 +1633,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all text channels with the given name.
-     * This method is case sensitive!
+     * This method is case-sensitive!
      *
      * @param name The name of the text channels. Can be <code>null</code> to search for group channels without name.
      * @return A collection with all text channels with the given name.
@@ -1449,7 +1647,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all text channels with the given name.
-     * This method is case insensitive!
+     * This method is case-insensitive!
      *
      * @param name The name of the text channels. Can be <code>null</code> to search for group channels without name.
      * @return A collection with all text channels with the given name.
@@ -1487,7 +1685,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all voice channels with the given name.
-     * This method is case sensitive!
+     * This method is case-sensitive!
      *
      * @param name The name of the voice channels. Can be <code>null</code> to search for group channels without name.
      * @return A collection with all voice channels with the given name.
@@ -1501,7 +1699,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all voice channels with the given name.
-     * This method is case insensitive!
+     * This method is case-insensitive!
      *
      * @param name The name of the voice channels. Can be <code>null</code> to search for group channels without name.
      * @return A collection with all voice channels with the given name.
@@ -1539,7 +1737,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all server channels with the given name.
-     * This method is case sensitive!
+     * This method is case-sensitive!
      *
      * @param name The name of the server channels.
      * @return A collection with all server channels with the given name.
@@ -1553,7 +1751,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all server channels with the given name.
-     * This method is case insensitive!
+     * This method is case-insensitive!
      *
      * @param name The name of the server channels.
      * @return A collection with all server channels with the given name.
@@ -1561,6 +1759,58 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
     default Collection<ServerChannel> getServerChannelsByNameIgnoreCase(String name) {
         return Collections.unmodifiableList(
                 getServerChannels().stream()
+                        .filter(channel -> channel.getName().equalsIgnoreCase(name))
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Gets a regular server channel by its id.
+     *
+     * @param id The id of the regular server channel.
+     * @return The regular server channel with the given id.
+     */
+    default Optional<RegularServerChannel> getRegularServerChannelById(long id) {
+        return getChannelById(id).flatMap(Channel::asRegularServerChannel);
+    }
+
+    /**
+     * Gets a regular server channel by its id.
+     *
+     * @param id The id of the regular server channel.
+     * @return The regular server channel with the given id.
+     */
+    default Optional<RegularServerChannel> getRegularServerChannelById(String id) {
+        try {
+            return getRegularServerChannelById(Long.parseLong(id));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Gets a collection with all regular server channels with the given name.
+     * This method is case-sensitive!
+     *
+     * @param name The name of the regular server channels.
+     * @return A collection with all regular server channels with the given name.
+     */
+    default Collection<RegularServerChannel> getRegularServerChannelsByName(String name) {
+        return Collections.unmodifiableList(
+                getRegularServerChannels().stream()
+                        .filter(channel -> channel.getName().equals(name))
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Gets a collection with all regular server channels with the given name.
+     * This method is case-insensitive!
+     *
+     * @param name The name of the regular server channels.
+     * @return A collection with all regular server channels with the given name.
+     */
+    default Collection<RegularServerChannel> getRegularServerChannelsByNameIgnoreCase(String name) {
+        return Collections.unmodifiableList(
+                getRegularServerChannels().stream()
                         .filter(channel -> channel.getName().equalsIgnoreCase(name))
                         .collect(Collectors.toList()));
     }
@@ -1591,7 +1841,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all channel categories with the given name.
-     * This method is case sensitive!
+     * This method is case-sensitive!
      *
      * @param name The name of the channel categories.
      * @return A collection with all channel categories with the given name.
@@ -1605,7 +1855,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all channel categories with the given name.
-     * This method is case insensitive!
+     * This method is case-insensitive!
      *
      * @param name The name of the channel categories.
      * @return A collection with all channel categories with the given name.
@@ -1643,7 +1893,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all server text channels with the given name.
-     * This method is case sensitive!
+     * This method is case-sensitive!
      *
      * @param name The name of the server text channels.
      * @return A collection with all server text channels with the given name.
@@ -1657,7 +1907,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all server text channels with the given name.
-     * This method is case insensitive!
+     * This method is case-insensitive!
      *
      * @param name The name of the server text channels.
      * @return A collection with all server text channels with the given name.
@@ -1667,6 +1917,58 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
                 getServerTextChannels().stream()
                         .filter(channel -> channel.getName().equalsIgnoreCase(name))
                         .collect(Collectors.toList()));
+    }
+
+    /**
+     * Gets a server thread channel by its id.
+     *
+     * @param id The id of the server thread channel.
+     * @return The server thread channel with the given id.
+     */
+    default Optional<ServerThreadChannel> getServerThreadChannelById(long id) {
+        return getChannelById(id).flatMap(Channel::asServerThreadChannel);
+    }
+
+    /**
+     * Gets a server thread channel by its id.
+     *
+     * @param id The id of the server thread channel.
+     * @return The server thread channel with the given id.
+     */
+    default Optional<ServerThreadChannel> getServerThreadChannelById(String id) {
+        try {
+            return getServerThreadChannelById(Long.parseLong(id));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Gets a set with all server thread channels with the given name.
+     * This method is case-sensitive!
+     *
+     * @param name The name of the server thread channels.
+     * @return A set with all server thread channels with the given name.
+     */
+    default Set<ServerThreadChannel> getServerThreadChannelsByName(String name) {
+        return Collections.unmodifiableSet(
+                getServerThreadChannels().stream()
+                        .filter(channel -> channel.getName().equals(name))
+                        .collect(Collectors.toSet()));
+    }
+
+    /**
+     * Gets a set with all server thread channels with the given name.
+     * This method is case-insensitive!
+     *
+     * @param name The name of the server thread channels.
+     * @return A set with all server thread channels with the given name.
+     */
+    default Set<ServerThreadChannel> getServerThreadChannelsByNameIgnoreCase(String name) {
+        return Collections.unmodifiableSet(
+                getServerThreadChannels().stream()
+                        .filter(channel -> channel.getName().equalsIgnoreCase(name))
+                        .collect(Collectors.toSet()));
     }
 
     /**
@@ -1695,7 +1997,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all server voice channels with the given name.
-     * This method is case sensitive!
+     * This method is case-sensitive!
      *
      * @param name The name of the server voice channels.
      * @return A collection with all server voice channels with the given name.
@@ -1709,7 +2011,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all server voice channels with the given name.
-     * This method is case insensitive!
+     * This method is case-insensitive!
      *
      * @param name The name of the server voice channels.
      * @return A collection with all server voice channels with the given name.
@@ -1747,7 +2049,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all server stage voice channels with the given name.
-     * This method is case sensitive!
+     * This method is case-sensitive!
      *
      * @param name The name of the server stage voice channels.
      * @return A collection with all server stage voice channels with the given name.
@@ -1761,7 +2063,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all server stage voice channels with the given name.
-     * This method is case insensitive!
+     * This method is case-insensitive!
      *
      * @param name The name of the server stage voice channels.
      * @return A collection with all server stage voice channels with the given name.
@@ -1823,7 +2125,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all group channels with the given name.
-     * This method is case sensitive!
+     * This method is case-sensitive!
      *
      * @param name The name of the group channels. Can be <code>null</code> to search for group channels without name.
      * @return A collection with all group channels with the given name.
@@ -1837,7 +2139,7 @@ public interface DiscordApi extends GloballyAttachableListenerManager {
 
     /**
      * Gets a collection with all server channels with the given name.
-     * This method is case insensitive!
+     * This method is case-insensitive!
      *
      * @param name The name of the group channels. Can be <code>null</code> to search for group channels without name.
      * @return A collection with all group channels with the given name.

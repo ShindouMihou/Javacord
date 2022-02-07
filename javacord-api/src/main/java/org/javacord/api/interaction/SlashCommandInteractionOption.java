@@ -19,6 +19,15 @@ public interface SlashCommandInteractionOption extends SlashCommandInteractionOp
     String getName();
 
     /**
+     * Checks if this option is the currently focused option for autocomplete.
+     *
+     * <p>Returns an empty optional if the invoked command is not autocompletable at all.
+     *
+     * @return Whether this option is the currently focused option for autocomplete.
+     */
+    Optional<Boolean> isFocused();
+
+    /**
      * Checks if the option is a subcommand or group.
      *
      * <p>If the option is a subcommand or group, it does have options but no value.
@@ -27,11 +36,20 @@ public interface SlashCommandInteractionOption extends SlashCommandInteractionOp
      * @return If the option is a subcommand or group.
      */
     default boolean isSubcommandOrGroup() {
-        return !getStringValue().isPresent();
+        return !getStringRepresentationValue().isPresent();
     }
 
     /**
-     * Gets the string representation of this option value.
+     * Gets the string representation value of this option.
+     *
+     * <p>This will always be present unless the option is a subcommand or subcommand group.
+     *
+     * @return The string representation value of this option.
+     */
+    Optional<String> getStringRepresentationValue();
+
+    /**
+     * Gets the string value of this option.
      *
      * <p>If this option does not have a string value or the option itself is a subcommand or group,
      * the optional will be empty.
@@ -41,14 +59,14 @@ public interface SlashCommandInteractionOption extends SlashCommandInteractionOp
     Optional<String> getStringValue();
 
     /**
-     * Gets the integer value of this option.
+     * Gets the long value of this option.
      *
-     * <p>If this option does not have an integer value or the option itself is a subcommand or group,
+     * <p>If this option does not have a long value or the option itself is a subcommand or group,
      *     the optional will be empty.
      *
-     * @return The integer value of this option.
+     * @return The long value of this option.
      */
-    Optional<Integer> getIntValue();
+    Optional<Long> getLongValue();
 
     /**
      * Gets the boolean value of this option.
@@ -114,6 +132,16 @@ public interface SlashCommandInteractionOption extends SlashCommandInteractionOp
      * @return The mentionable value of this option.
      */
     Optional<Mentionable> getMentionableValue();
+
+    /**
+     * Gets the decimal value of this option.
+     *
+     * <p>If this option does not have a decimal value or the option itself is a subcommand or group,
+     *     the optional will be empty.
+     *
+     * @return The decimal value of this option.
+     */
+    Optional<Double> getDecimalValue();
 
     /**
      * Gets the mentionable value of this option.

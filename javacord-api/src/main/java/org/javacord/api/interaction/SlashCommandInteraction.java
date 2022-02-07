@@ -1,25 +1,17 @@
 package org.javacord.api.interaction;
 
-public interface SlashCommandInteraction
-        extends InteractionBase, SlashCommandInteractionOptionsProvider {
-    /**
-     * Gets the id of the invoked slash command.
-     *
-     * @return The id of the invoked command.
-     */
-    long getCommandId();
+import java.util.List;
+
+public interface SlashCommandInteraction extends ApplicationCommandInteraction, SlashCommandInteractionOptionsProvider {
 
     /**
-     * Gets the id of the invoked slash command as string.
+     * Gets the arguments of this slash command if there are any.
      *
-     * @return The id of the invoked command as string.
+     * <p>This is a shorthand method to avoid checking for Subcommmands or SubcommandGroups
+     * to get the slash command arguments.
+     *
+     * @return The argument options.
      */
-    String getCommandIdAsString();
+    List<SlashCommandInteractionOption> getArguments();
 
-    /**
-     * Gets the name of the invoked slash command.
-     *
-     * @return The name of the invoked command.
-     */
-    String getCommandName();
 }

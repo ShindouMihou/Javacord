@@ -12,20 +12,39 @@ import java.util.concurrent.CompletableFuture;
 /**
  * This class represents a server voice channel.
  */
-public interface ServerVoiceChannel extends ServerChannel, VoiceChannel, Categorizable,
+public interface ServerVoiceChannel extends RegularServerChannel, VoiceChannel, Categorizable,
                                             ServerVoiceChannelAttachableListenerManager {
 
-    @Override
-    default ChannelType getType() {
-        return ChannelType.SERVER_VOICE_CHANNEL;
+    /**
+     * Connects to the voice channel self-deafened and disconnects any existing connections in the server.
+     *
+     * @return The audio connection.
+     */
+    default CompletableFuture<AudioConnection> connect() {
+        return connect(false, true);
     }
 
     /**
      * Connects to the voice channel and disconnects any existing connections in the server.
      *
+     * @param muted Whether to connect self-muted.
+     * @param deafened Whether to connect self-deafened.
      * @return The audio connection.
      */
-    CompletableFuture<AudioConnection> connect();
+    CompletableFuture<AudioConnection> connect(boolean muted, boolean deafened);
+
+    /**
+     * Disconnects from the voice channel if connected.
+     *
+     * @return A CompletableFuture which completes when the connection has been disconnected.
+     */
+    default CompletableFuture<Void> disconnect() {
+        return getServer()
+                .getAudioConnection()
+                .filter(audioConnection -> equals(audioConnection.getChannel()))
+                .map(AudioConnection::close)
+                .orElseGet(() -> CompletableFuture.completedFuture(null));
+    }
 
     /**
      * Gets the bitrate (int bits) of the channel.
@@ -146,13 +165,13 @@ public interface ServerVoiceChannel extends ServerChannel, VoiceChannel, Categor
     }
 
     @Override
-    default Optional<ServerVoiceChannel> getCurrentCachedInstance() {
+    default Optional<? extends ServerVoiceChannel> getCurrentCachedInstance() {
         return getApi().getServerById(getServer().getId()).flatMap(server -> server.getVoiceChannelById(getId()));
     }
 
     @Override
-    default CompletableFuture<ServerVoiceChannel> getLatestInstance() {
-        Optional<ServerVoiceChannel> currentCachedInstance = getCurrentCachedInstance();
+    default CompletableFuture<? extends ServerVoiceChannel> getLatestInstance() {
+        Optional<? extends ServerVoiceChannel> currentCachedInstance = getCurrentCachedInstance();
         if (currentCachedInstance.isPresent()) {
             return CompletableFuture.completedFuture(currentCachedInstance.get());
         } else {

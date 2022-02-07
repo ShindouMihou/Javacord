@@ -31,9 +31,9 @@ public interface DiscordApiBuilderDelegate {
     void setGlobalRatelimiter(Ratelimiter ratelimiter);
 
     /**
-     * Sets a ratelimiter that can be used to respect the 5 second gateway identify ratelimit.
+     * Sets a ratelimiter that can be used to respect the 5-second gateway identify ratelimit.
      *
-     * @param ratelimiter The ratelimiter used to respect the 5 second gateway identify ratelimit.
+     * @param ratelimiter The ratelimiter used to respect the 5-second gateway identify ratelimit.
      */
     void setGatewayIdentifyRatelimiter(Ratelimiter ratelimiter);
 
@@ -172,11 +172,34 @@ public interface DiscordApiBuilderDelegate {
     boolean isShutdownHookRegistrationEnabled();
 
     /**
+     * Adds the given intents to the already set.
+     *
+     * @param intents The intents to add.
+     */
+    void addIntents(Intent... intents);
+
+    /**
      * Sets the intents where the given predicate matches.
      *
      * @param condition Whether the intent should be added or not.
      */
     void setAllIntentsWhere(Predicate<Intent> condition);
+
+    /**
+     * Sets whether the user cache should be enabled.
+     *
+     * <p>By default, the user cache is disabled.
+     *
+     * @param enabled Whether the user cache should be enabled.
+     */
+    void setUserCacheEnabled(boolean enabled);
+
+    /**
+     * Gets whether the user cache is enabled.
+     *
+     * @return Whether the user cache is enabled.
+     */
+    boolean isUserCacheEnabled();
 
     /**
      * Logs the bot in.

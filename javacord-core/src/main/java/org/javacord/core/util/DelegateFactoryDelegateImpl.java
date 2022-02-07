@@ -3,26 +3,32 @@ package org.javacord.core.util;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.audio.internal.AudioSourceBaseDelegate;
 import org.javacord.api.entity.channel.GroupChannel;
+import org.javacord.api.entity.channel.RegularServerChannel;
 import org.javacord.api.entity.channel.ServerChannel;
 import org.javacord.api.entity.channel.ServerTextChannel;
+import org.javacord.api.entity.channel.ServerThreadChannel;
 import org.javacord.api.entity.channel.ServerVoiceChannel;
 import org.javacord.api.entity.channel.internal.ChannelCategoryBuilderDelegate;
 import org.javacord.api.entity.channel.internal.GroupChannelUpdaterDelegate;
+import org.javacord.api.entity.channel.internal.RegularServerChannelUpdaterDelegate;
 import org.javacord.api.entity.channel.internal.ServerChannelUpdaterDelegate;
 import org.javacord.api.entity.channel.internal.ServerTextChannelBuilderDelegate;
 import org.javacord.api.entity.channel.internal.ServerTextChannelUpdaterDelegate;
+import org.javacord.api.entity.channel.internal.ServerThreadChannelBuilderDelegate;
+import org.javacord.api.entity.channel.internal.ServerThreadChannelUpdaterDelegate;
 import org.javacord.api.entity.channel.internal.ServerVoiceChannelBuilderDelegate;
 import org.javacord.api.entity.channel.internal.ServerVoiceChannelUpdaterDelegate;
 import org.javacord.api.entity.emoji.KnownCustomEmoji;
 import org.javacord.api.entity.emoji.internal.CustomEmojiBuilderDelegate;
 import org.javacord.api.entity.emoji.internal.CustomEmojiUpdaterDelegate;
+import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.component.internal.ActionRowBuilderDelegate;
 import org.javacord.api.entity.message.component.internal.ButtonBuilderDelegate;
 import org.javacord.api.entity.message.component.internal.SelectMenuBuilderDelegate;
 import org.javacord.api.entity.message.component.internal.SelectMenuOptionBuilderDelegate;
 import org.javacord.api.entity.message.embed.internal.EmbedBuilderDelegate;
 import org.javacord.api.entity.message.internal.InteractionMessageBuilderDelegate;
-import org.javacord.api.entity.message.internal.MessageBuilderDelegate;
+import org.javacord.api.entity.message.internal.MessageBuilderBaseDelegate;
 import org.javacord.api.entity.message.internal.WebhookMessageBuilderDelegate;
 import org.javacord.api.entity.message.mention.internal.AllowedMentionsBuilderDelegate;
 import org.javacord.api.entity.permission.Permissions;
@@ -34,15 +40,21 @@ import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.server.internal.ServerBuilderDelegate;
 import org.javacord.api.entity.server.internal.ServerUpdaterDelegate;
 import org.javacord.api.entity.server.invite.internal.InviteBuilderDelegate;
+import org.javacord.api.entity.sticker.internal.StickerBuilderDelegate;
+import org.javacord.api.entity.sticker.internal.StickerUpdaterDelegate;
 import org.javacord.api.entity.webhook.Webhook;
 import org.javacord.api.entity.webhook.internal.WebhookBuilderDelegate;
 import org.javacord.api.entity.webhook.internal.WebhookUpdaterDelegate;
+import org.javacord.api.interaction.internal.ApplicationCommandPermissionsBuilderDelegate;
+import org.javacord.api.interaction.internal.ApplicationCommandPermissionsUpdaterDelegate;
+import org.javacord.api.interaction.internal.MessageContextMenuBuilderDelegate;
+import org.javacord.api.interaction.internal.MessageContextMenuUpdaterDelegate;
 import org.javacord.api.interaction.internal.SlashCommandBuilderDelegate;
 import org.javacord.api.interaction.internal.SlashCommandOptionBuilderDelegate;
 import org.javacord.api.interaction.internal.SlashCommandOptionChoiceBuilderDelegate;
-import org.javacord.api.interaction.internal.SlashCommandPermissionsBuilderDelegate;
-import org.javacord.api.interaction.internal.SlashCommandPermissionsUpdaterDelegate;
 import org.javacord.api.interaction.internal.SlashCommandUpdaterDelegate;
+import org.javacord.api.interaction.internal.UserContextMenuBuilderDelegate;
+import org.javacord.api.interaction.internal.UserContextMenuUpdaterDelegate;
 import org.javacord.api.internal.AccountUpdaterDelegate;
 import org.javacord.api.internal.DiscordApiBuilderDelegate;
 import org.javacord.api.util.exception.DiscordExceptionValidator;
@@ -54,15 +66,18 @@ import org.javacord.core.DiscordApiImpl;
 import org.javacord.core.audio.AudioSourceBaseDelegateImpl;
 import org.javacord.core.entity.channel.ChannelCategoryBuilderDelegateImpl;
 import org.javacord.core.entity.channel.ChannelUpdaterDelegateImpl;
+import org.javacord.core.entity.channel.RegularServerChannelUpdaterDelegateImpl;
 import org.javacord.core.entity.channel.ServerChannelUpdaterDelegateImpl;
 import org.javacord.core.entity.channel.ServerTextChannelBuilderDelegateImpl;
 import org.javacord.core.entity.channel.ServerTextChannelUpdaterDelegateImpl;
+import org.javacord.core.entity.channel.ServerThreadChannelBuilderDelegateImpl;
+import org.javacord.core.entity.channel.ServerThreadChannelUpdaterDelegateImpl;
 import org.javacord.core.entity.channel.ServerVoiceChannelBuilderDelegateImpl;
 import org.javacord.core.entity.channel.ServerVoiceChannelUpdaterDelegateImpl;
 import org.javacord.core.entity.emoji.CustomEmojiBuilderDelegateImpl;
 import org.javacord.core.entity.emoji.CustomEmojiUpdaterDelegateImpl;
 import org.javacord.core.entity.message.InteractionMessageBuilderDelegateImpl;
-import org.javacord.core.entity.message.MessageBuilderDelegateImpl;
+import org.javacord.core.entity.message.MessageBuilderBaseDelegateImpl;
 import org.javacord.core.entity.message.WebhookMessageBuilderDelegateImpl;
 import org.javacord.core.entity.message.component.internal.ActionRowBuilderDelegateImpl;
 import org.javacord.core.entity.message.component.internal.ButtonBuilderDelegateImpl;
@@ -77,14 +92,20 @@ import org.javacord.core.entity.server.ServerBuilderDelegateImpl;
 import org.javacord.core.entity.server.ServerImpl;
 import org.javacord.core.entity.server.ServerUpdaterDelegateImpl;
 import org.javacord.core.entity.server.invite.InviteBuilderDelegateImpl;
+import org.javacord.core.entity.sticker.StickerBuilderDelegateImpl;
+import org.javacord.core.entity.sticker.StickerUpdaterDelegateImpl;
 import org.javacord.core.entity.webhook.WebhookBuilderDelegateImpl;
 import org.javacord.core.entity.webhook.WebhookUpdaterDelegateImpl;
+import org.javacord.core.interaction.ApplicationCommandPermissionsBuilderDelegateImpl;
+import org.javacord.core.interaction.ApplicationCommandPermissionsUpdaterDelegateImpl;
+import org.javacord.core.interaction.MessageContextMenuBuilderDelegateImpl;
+import org.javacord.core.interaction.MessageContextMenuUpdaterDelegateImpl;
 import org.javacord.core.interaction.SlashCommandBuilderDelegateImpl;
 import org.javacord.core.interaction.SlashCommandOptionBuilderDelegateImpl;
 import org.javacord.core.interaction.SlashCommandOptionChoiceBuilderDelegateImpl;
-import org.javacord.core.interaction.SlashCommandPermissionsBuilderDelegateImpl;
-import org.javacord.core.interaction.SlashCommandPermissionsUpdaterDelegateImpl;
 import org.javacord.core.interaction.SlashCommandUpdaterDelegateImpl;
+import org.javacord.core.interaction.UserContextMenuBuilderDelegateImpl;
+import org.javacord.core.interaction.UserContextMenuUpdaterDelegateImpl;
 import org.javacord.core.util.exception.DiscordExceptionValidatorImpl;
 import org.javacord.core.util.logging.ExceptionLoggerDelegateImpl;
 
@@ -109,8 +130,8 @@ public class DelegateFactoryDelegateImpl implements DelegateFactoryDelegate {
     }
 
     @Override
-    public MessageBuilderDelegate createMessageBuilderDelegate() {
-        return new MessageBuilderDelegateImpl();
+    public MessageBuilderBaseDelegate createMessageBuilderDelegate() {
+        return new MessageBuilderBaseDelegateImpl();
     }
 
     @Override
@@ -141,6 +162,17 @@ public class DelegateFactoryDelegateImpl implements DelegateFactoryDelegate {
     @Override
     public ServerTextChannelBuilderDelegate createServerTextChannelBuilderDelegate(Server server) {
         return new ServerTextChannelBuilderDelegateImpl((ServerImpl) server);
+    }
+
+    @Override
+    public ServerThreadChannelBuilderDelegate createServerThreadChannelBuilderDelegate(
+            ServerTextChannel serverTextChannel) {
+        return new ServerThreadChannelBuilderDelegateImpl(serverTextChannel);
+    }
+
+    @Override
+    public ServerThreadChannelBuilderDelegate createServerThreadChannelBuilderDelegate(Message message) {
+        return new ServerThreadChannelBuilderDelegateImpl(message);
     }
 
     @Override
@@ -184,6 +216,16 @@ public class DelegateFactoryDelegateImpl implements DelegateFactoryDelegate {
     }
 
     @Override
+    public UserContextMenuUpdaterDelegate createUserContextMenuUpdaterDelegate(long commandId) {
+        return new UserContextMenuUpdaterDelegateImpl(commandId);
+    }
+
+    @Override
+    public MessageContextMenuUpdaterDelegate createMessageContextMenuUpdaterDelegate(long commandId) {
+        return new MessageContextMenuUpdaterDelegateImpl(commandId);
+    }
+
+    @Override
     public GroupChannelUpdaterDelegate createGroupChannelUpdaterDelegate(GroupChannel channel) {
         return new ChannelUpdaterDelegateImpl(channel);
     }
@@ -194,6 +236,12 @@ public class DelegateFactoryDelegateImpl implements DelegateFactoryDelegate {
     }
 
     @Override
+    public RegularServerChannelUpdaterDelegate createRegularServerChannelUpdaterDelegate(
+            RegularServerChannel channel) {
+        return new RegularServerChannelUpdaterDelegateImpl(channel);
+    }
+
+    @Override
     public ServerTextChannelUpdaterDelegate createServerTextChannelUpdaterDelegate(ServerTextChannel channel) {
         return new ServerTextChannelUpdaterDelegateImpl(channel);
     }
@@ -201,6 +249,11 @@ public class DelegateFactoryDelegateImpl implements DelegateFactoryDelegate {
     @Override
     public ServerVoiceChannelUpdaterDelegate createServerVoiceChannelUpdaterDelegate(ServerVoiceChannel channel) {
         return new ServerVoiceChannelUpdaterDelegateImpl(channel);
+    }
+
+    @Override
+    public ServerThreadChannelUpdaterDelegate createServerThreadChannelUpdaterDelegate(ServerThreadChannel thread) {
+        return new ServerThreadChannelUpdaterDelegateImpl(thread);
     }
 
     @Override
@@ -234,19 +287,29 @@ public class DelegateFactoryDelegateImpl implements DelegateFactoryDelegate {
     }
 
     @Override
+    public UserContextMenuBuilderDelegate createUserContextMenuBuilderDelegate() {
+        return new UserContextMenuBuilderDelegateImpl();
+    }
+
+    @Override
+    public MessageContextMenuBuilderDelegate createMessageContextMenuBuilderDelegate() {
+        return new MessageContextMenuBuilderDelegateImpl();
+    }
+
+    @Override
     public SlashCommandOptionBuilderDelegate createSlashCommandOptionBuilderDelegate() {
         return new SlashCommandOptionBuilderDelegateImpl();
     }
 
     @Override
-    public SlashCommandPermissionsUpdaterDelegate createSlashCommandPermissionsUpdaterDelegate(
+    public ApplicationCommandPermissionsUpdaterDelegate createApplicationCommandPermissionsUpdaterDelegate(
             Server server) {
-        return new SlashCommandPermissionsUpdaterDelegateImpl(server);
+        return new ApplicationCommandPermissionsUpdaterDelegateImpl(server);
     }
 
     @Override
-    public SlashCommandPermissionsBuilderDelegate createSlashCommandPermissionsBuilderDelegate() {
-        return new SlashCommandPermissionsBuilderDelegateImpl();
+    public ApplicationCommandPermissionsBuilderDelegate createApplicationCommandPermissionsBuilderDelegate() {
+        return new ApplicationCommandPermissionsBuilderDelegateImpl();
     }
 
     @Override
@@ -272,6 +335,16 @@ public class DelegateFactoryDelegateImpl implements DelegateFactoryDelegate {
     @Override
     public SelectMenuOptionBuilderDelegate createSelectMenuOptionBuilderDelegate() {
         return new SelectMenuOptionBuilderDelegateImpl();
+    }
+
+    @Override
+    public StickerBuilderDelegate createStickerBuilderDelegate(Server server) {
+        return new StickerBuilderDelegateImpl((ServerImpl) server);
+    }
+
+    @Override
+    public StickerUpdaterDelegate createStickerUpdaterDelegate(Server server, long id) {
+        return new StickerUpdaterDelegateImpl((ServerImpl) server, id);
     }
 
     @Override

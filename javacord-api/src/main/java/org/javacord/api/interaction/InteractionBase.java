@@ -48,8 +48,20 @@ public interface InteractionBase extends DiscordEntity {
     CompletableFuture<InteractionOriginalResponseUpdater> respondLater();
 
     /**
-     * Create a message builder to send follow up messages for this interaction.
-     * You can send, edit and delete follow up messages up to 15 minutes after you received the interaction.
+     * Sends an acknowledgement of the interaction to Discord and displays an (ephemeral) loading state to the user,
+     * indicating that you'll respond with a delay.
+     * Please note that you can only actually update this loading state message within 15 minutes after receiving the
+     * interaction.
+     *
+     * @param ephemeral Whether the response should be ephemeral
+     * @return A CompletableFuture that completes as soon as the acknowledgement has been sent; it yields an updater
+     *     that should be used to update the message later on.
+     */
+    CompletableFuture<InteractionOriginalResponseUpdater> respondLater(boolean ephemeral);
+
+    /**
+     * Create a message builder to send follow-up messages for this interaction.
+     * You can send, edit and delete follow-up messages for up to 15 minutes after you received the interaction.
      *
      * @return The new message builder.
      */

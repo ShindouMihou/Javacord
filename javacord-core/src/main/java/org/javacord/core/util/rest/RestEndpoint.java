@@ -14,7 +14,7 @@ public enum RestEndpoint {
     GATEWAY_BOT("/gateway/bot"),
     MESSAGE("/channels/%s/messages", 0),
     /**
-     * This is the same endpoint as {@link RestEndpoint#MESSAGE}, but it has an different ratelimit bucket.
+     * This is the same endpoint as {@link RestEndpoint#MESSAGE}, but it has a different ratelimit bucket.
      */
     MESSAGE_DELETE("/channels/%s/messages", 0),
     MESSAGES_BULK_DELETE("/channels/%s/messages/bulk-delete", 0),
@@ -46,15 +46,30 @@ public enum RestEndpoint {
     CURRENT_USER("/users/@me"),
     AUDIT_LOG("/guilds/%s/audit-logs", 0),
     CUSTOM_EMOJI("/guilds/%s/emojis", 0),
+    STICKER("/stickers"),
+    STICKER_PACK("/sticker-packs"),
+    SERVER_STICKER("/guilds/%s/stickers", 0),
+    // interactions
     INTERACTION_RESPONSE("/interactions/%s/%s/callback", 0),
     ORIGINAL_INTERACTION_RESPONSE("/webhooks/%s/%s/messages/@original",0),
-    SLASH_COMMANDS("/applications/%s/commands", 0),
-    SERVER_SLASH_COMMANDS("/applications/%s/guilds/%s/commands",0),
-    SERVER_SLASH_COMMAND_PERMISSIONS("/applications/%s/guilds/%s/commands/permissions",0),
-    SLASH_COMMAND_PERMISSIONS("/applications/%s/guilds/%s/commands/%s/permissions",0);
+    APPLICATION_COMMANDS("/applications/%s/commands", 0),
+    SERVER_APPLICATION_COMMANDS("/applications/%s/guilds/%s/commands",0),
+    SERVER_APPLICATION_COMMAND_PERMISSIONS("/applications/%s/guilds/%s/commands/permissions",0),
+    APPLICATION_COMMAND_PERMISSIONS("/applications/%s/guilds/%s/commands/%s/permissions",0),
+
+    //threads
+    START_THREAD_WITH_MESSAGE("/channels/%s/messages/%s/threads", 0),
+    START_THREAD_WITHOUT_MESSAGE("/channels/%s/threads", 0),
+    JOIN_LEAVE_THREAD("/channels/%s/thread-members/@me", 0),
+    ADD_REMOVE_THREAD_MEMBER("/channels/%s/thread-members/%s", 0),
+    LIST_THREAD_MEMBERS("/channels/%s/thread-members", 0),
+    LIST_ACTIVE_THREADS("/guilds/%s/threads/active", 0),
+    LIST_PUBLIC_ARCHIVED_THREADS("/channels/%s/threads/archived/public", 0),
+    LIST_PRIVATE_ARCHIVED_THREADS("/channels/%s/threads/archived/private", 0),
+    LIST_JOINED_PRIVATE_ARCHIVED_THREADS("/channels/%s/users/@me/threads/archived/private", 0);
 
     /**
-     * The endpoint url (only including the base, not the https://discord.com/api/vXYZ/ "prefix".
+     * The endpoint url (only including the base, not the https://discord.com/api/vXYZ/ "prefix").
      */
     private final String endpointUrl;
 
@@ -115,7 +130,7 @@ public enum RestEndpoint {
     }
 
     /**
-     * Gets the endpoint url (only including the base, not the https://discord.com/api/vXYZ/ "prefix".
+     * Gets the endpoint url (only including the base, not the https://discord.com/api/vXYZ/ "prefix").
      *
      * @return The gateway url.
      */

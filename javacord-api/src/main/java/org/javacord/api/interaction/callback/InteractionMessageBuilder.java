@@ -4,25 +4,24 @@ import org.javacord.api.entity.Icon;
 import org.javacord.api.entity.Mentionable;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageDecoration;
-import org.javacord.api.entity.message.MessageFlag;
 import org.javacord.api.entity.message.component.HighLevelComponent;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.message.internal.InteractionMessageBuilderDelegate;
 import org.javacord.api.entity.message.mention.AllowedMentions;
 import org.javacord.api.interaction.InteractionBase;
 import org.javacord.api.util.internal.DelegateFactory;
-
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
  * This class is intended to be used by advanced users that desire full control over interaction responses.
- * We strongly recommend to use the offered methods on your received interactions instead of this class.
+ * We strongly recommend using the offered methods on your received interactions instead of this class.
  */
 public class InteractionMessageBuilder implements ExtendedInteractionMessageBuilderBase<InteractionMessageBuilder> {
 
@@ -42,11 +41,8 @@ public class InteractionMessageBuilder implements ExtendedInteractionMessageBuil
      */
     public CompletableFuture<InteractionMessageBuilder> sendInitialResponse(InteractionBase interaction) {
         CompletableFuture<InteractionMessageBuilder> future = new CompletableFuture<>();
-
-        CompletableFuture<Void> job = delegate.sendInitialResponse(interaction)
-                .thenRun(() -> {
-                    future.complete(this);
-                })
+        delegate.sendInitialResponse(interaction)
+                .thenRun(() -> future.complete(this))
                 .exceptionally(e -> {
                     future.completeExceptionally(e);
                     return null;
@@ -157,6 +153,12 @@ public class InteractionMessageBuilder implements ExtendedInteractionMessageBuil
     }
 
     @Override
+    public InteractionMessageBuilder appendNamedLink(final String name, final String url) {
+        delegate.appendNamedLink(name, url);
+        return this;
+    }
+
+    @Override
     public InteractionMessageBuilder appendNewLine() {
         delegate.appendNewLine();
         return this;
@@ -176,6 +178,12 @@ public class InteractionMessageBuilder implements ExtendedInteractionMessageBuil
 
     @Override
     public InteractionMessageBuilder addEmbeds(EmbedBuilder... embeds) {
+        delegate.addEmbeds(Arrays.asList(embeds));
+        return this;
+    }
+
+    @Override
+    public InteractionMessageBuilder addEmbeds(List<EmbedBuilder> embeds) {
         delegate.addEmbeds(embeds);
         return this;
     }
@@ -235,14 +243,14 @@ public class InteractionMessageBuilder implements ExtendedInteractionMessageBuil
     }
 
     @Override
-    public InteractionMessageBuilder setFlags(MessageFlag... messageFlags) {
-        setFlags(EnumSet.copyOf(Arrays.asList(messageFlags)));
+    public InteractionMessageBuilder setFlags(InteractionCallbackDataFlag... interactionCallbackDataFlags) {
+        setFlags(EnumSet.copyOf(Arrays.asList(interactionCallbackDataFlags)));
         return this;
     }
 
     @Override
-    public InteractionMessageBuilder setFlags(EnumSet<MessageFlag> messageFlags) {
-        delegate.setFlags(messageFlags);
+    public InteractionMessageBuilder setFlags(EnumSet<InteractionCallbackDataFlag> interactionCallbackDataFlags) {
+        delegate.setFlags(interactionCallbackDataFlags);
         return this;
     }
 

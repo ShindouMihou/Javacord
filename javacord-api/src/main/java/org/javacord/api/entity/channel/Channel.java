@@ -52,6 +52,15 @@ public interface Channel extends DiscordEntity, UpdatableFromCache, ChannelAttac
     }
 
     /**
+     * Gets the channel as regular server channel.
+     *
+     * @return The channel as server text channel.
+     */
+    default Optional<RegularServerChannel> asRegularServerChannel() {
+        return as(RegularServerChannel.class);
+    }
+
+    /**
      * Gets the channel as channel category.
      *
      * @return The channel as channel category.
@@ -114,6 +123,14 @@ public interface Channel extends DiscordEntity, UpdatableFromCache, ChannelAttac
         return as(VoiceChannel.class);
     }
 
+    /**
+     * Gets the channel as server thread channel.
+     *
+     * @return The channel as server thread channel.
+     */
+    default Optional<ServerThreadChannel> asServerThreadChannel() {
+        return as(ServerThreadChannel.class);
+    }
 
     /**
      * Checks if the given user can see this channel.
@@ -133,7 +150,7 @@ public interface Channel extends DiscordEntity, UpdatableFromCache, ChannelAttac
         if (groupChannel.isPresent()) {
             return user.isYourself() || groupChannel.get().getMembers().contains(user);
         }
-        Optional<ServerChannel> severChannel = asServerChannel();
+        Optional<RegularServerChannel> severChannel = asRegularServerChannel();
         return !severChannel.isPresent()
                 || severChannel.get().hasAnyPermission(user,
                                                        PermissionType.ADMINISTRATOR,

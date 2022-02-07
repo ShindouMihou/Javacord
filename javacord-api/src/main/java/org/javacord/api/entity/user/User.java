@@ -151,7 +151,7 @@ public interface User extends DiscordEntity, Messageable, Nameable, Mentionable,
      *
      * <p>This will return {@link UserStatus#OFFLINE} for invisible users.
      *
-     * @return The status of the the user.
+     * @return The status of the user.
      * @see #getStatusOnClient(DiscordClient)
      */
     default UserStatus getDesktopStatus() {
@@ -163,7 +163,7 @@ public interface User extends DiscordEntity, Messageable, Nameable, Mentionable,
      *
      * <p>This will return {@link UserStatus#OFFLINE} for invisible users.
      *
-     * @return The status of the the user.
+     * @return The status of the user.
      * @see #getStatusOnClient(DiscordClient)
      */
     default UserStatus getMobileStatus() {
@@ -175,7 +175,7 @@ public interface User extends DiscordEntity, Messageable, Nameable, Mentionable,
      *
      * <p>This will return {@link UserStatus#OFFLINE} for invisible users.
      *
-     * @return The status of the the user.
+     * @return The status of the user.
      * @see #getStatusOnClient(DiscordClient)
      */
     default UserStatus getWebStatus() {
@@ -204,11 +204,64 @@ public interface User extends DiscordEntity, Messageable, Nameable, Mentionable,
     EnumSet<UserFlag> getUserFlags();
 
     /**
+     * Gets the avatar hash of the user.
+     *
+     * @return The avatar hash.
+     */
+    Optional<String> getAvatarHash();
+
+    /**
      * Gets the avatar of the user.
      *
      * @return The avatar of the user.
      */
     Icon getAvatar();
+
+    /**
+     * Gets the avatar of the user.
+     *
+     * @param size the size of the image. must be any power of 2 between 16 and 4096
+     * @return The avatar of the user.
+     */
+    Icon getAvatar(int size);
+
+    /**
+     * Gets the user's server-specific avatar in the given server.
+     *
+     * @param server The server.
+     * @return The user's avatar in the server
+     */
+    Optional<Icon> getServerAvatar(Server server);
+
+    /**
+     * Gets the user's server-specific avatar in the given server at the given image size.
+     *
+     * @param server The server.
+     * @param size The size of the image, must be any power of 2 between 16 and 4096.
+     * @return The user's avatar in the server.
+     */
+    Optional<Icon> getServerAvatar(Server server, int size);
+
+    /**
+     * Gets the user's effective avatar in the given server.
+     * This will return the user's server-specific avatar if they have one, otherwise it will return their account
+     * avatar.
+     *
+     * @param server The server.
+     * @return The user's effective avatar.
+     */
+    Icon getEffectiveAvatar(Server server);
+
+    /**
+     * Gets the user's effective avatar in the given server at the given size.
+     * This will return the user's server-specific avatar if they have one, otherwise it will return their account
+     * avatar.
+     *
+     * @param server The server.
+     * @param size The size of the image, must be any power of 2 between 16 and 4096.
+     * @return The user's effective avatar.
+     */
+    Icon getEffectiveAvatar(Server server, int size);
 
     /**
      * Gets if the user has a default Discord avatar.
@@ -222,7 +275,7 @@ public interface User extends DiscordEntity, Messageable, Nameable, Mentionable,
      *
      * @return All mutual servers with this user.
      */
-    Collection<Server> getMutualServers();
+    Set<Server> getMutualServers();
 
     /**
      * Gets the display name of the user.
@@ -234,7 +287,7 @@ public interface User extends DiscordEntity, Messageable, Nameable, Mentionable,
     String getDisplayName(Server server);
 
     /**
-     * Gets the discriminated name of the user, e. g. {@code Bastian#8222}.
+     * Gets the discriminated name of the user, e.g. {@code Bastian#8222}.
      *
      * @return The discriminated name of the user.
      */
@@ -347,7 +400,7 @@ public interface User extends DiscordEntity, Messageable, Nameable, Mentionable,
     /**
      * Mutes this user on the given server.
      *
-     * @param server The server to umute this user on.
+     * @param server The server to mute this user on.
      * @return A future to check if the mute was successful.
      */
     default CompletableFuture<Void> mute(Server server) {
@@ -357,7 +410,7 @@ public interface User extends DiscordEntity, Messageable, Nameable, Mentionable,
     /**
      * Mutes this user on the given server.
      *
-     * @param server The server to umute this user on.
+     * @param server The server to mute this user on.
      * @param reason The audit log reason for this action.
      * @return A future to check if the mute was successful.
      */
@@ -368,7 +421,7 @@ public interface User extends DiscordEntity, Messageable, Nameable, Mentionable,
     /**
      * Unmutes this user on the given server.
      *
-     * @param server The server to unumute this user on.
+     * @param server The server to unmute this user on.
      * @return A future to check if the unmute was successful.
      */
     default CompletableFuture<Void> unmute(Server server) {
@@ -378,7 +431,7 @@ public interface User extends DiscordEntity, Messageable, Nameable, Mentionable,
     /**
      * Unmutes this user on the given server.
      *
-     * @param server The server to unumute this user on.
+     * @param server The server to unmute this user on.
      * @param reason The audit log reason for this action.
      * @return A future to check if the unmute was successful.
      */
@@ -466,7 +519,7 @@ public interface User extends DiscordEntity, Messageable, Nameable, Mentionable,
     List<Role> getRoles(Server server);
 
     /**
-     * Gets the displayed color of the user based on his roles in the given server.
+     * Gets the displayed color of the user based on their roles in the given server.
      *
      * @param server The server.
      * @return The color.
@@ -486,7 +539,7 @@ public interface User extends DiscordEntity, Messageable, Nameable, Mentionable,
 
     /**
      * Gets the private channel with the user.
-     * This will only be present, if there was an conversation with the user in the past or you manually opened a
+     * This will only be present, if there was a conversation with the user in the past, or you manually opened a
      * private channel with the given user, using {@link #openPrivateChannel()}.
      *
      * @return The private channel with the user.

@@ -3,34 +3,34 @@ package org.javacord.core.entity.message;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.javacord.api.entity.message.Message;
-import org.javacord.api.entity.message.MessageFlag;
+import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.message.internal.InteractionMessageBuilderDelegate;
 import org.javacord.api.interaction.InteractionBase;
 import org.javacord.api.interaction.MessageComponentInteraction;
+import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
 import org.javacord.core.entity.message.embed.EmbedBuilderDelegateImpl;
 import org.javacord.core.interaction.InteractionImpl;
 import org.javacord.core.util.FileContainer;
 import org.javacord.core.util.rest.RestEndpoint;
 import org.javacord.core.util.rest.RestMethod;
 import org.javacord.core.util.rest.RestRequest;
-
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
 
-public class InteractionMessageBuilderDelegateImpl extends MessageBuilderDelegateImpl
+public class InteractionMessageBuilderDelegateImpl extends MessageBuilderBaseDelegateImpl
         implements InteractionMessageBuilderDelegate {
 
     /**
-     * The message flags of the message.
+     * The interaction callback data flags of the message.
      */
-    private EnumSet<MessageFlag> messageFlags = null;
+    private EnumSet<InteractionCallbackDataFlag> interactionCallbackDataFlags = null;
 
     @Override
-    public void setFlags(EnumSet<MessageFlag> messageFlags) {
-        this.messageFlags = messageFlags;
+    public void setFlags(EnumSet<InteractionCallbackDataFlag> interactionCallbackDataFlags) {
+        this.interactionCallbackDataFlags = interactionCallbackDataFlags;
     }
 
     @Override
@@ -111,7 +111,7 @@ public class InteractionMessageBuilderDelegateImpl extends MessageBuilderDelegat
     @Override
     public void copy(InteractionBase interaction) {
         ((InteractionImpl) interaction).asMessageComponentInteraction()
-                .flatMap(MessageComponentInteraction::getMessage)
+                .map(MessageComponentInteraction::getMessage)
                 .ifPresent(this::copy);
     }
 
@@ -125,23 +125,24 @@ public class InteractionMessageBuilderDelegateImpl extends MessageBuilderDelegat
     private void prepareInteractionWebhookBodyParts(ObjectNode body) {
         prepareCommonWebhookMessageBodyParts(body);
         prepareComponents(body, true);
-        if (null != messageFlags) {
-            body.put("flags", messageFlags.stream().mapToInt(MessageFlag::getId).sum());
+        if (null != interactionCallbackDataFlags) {
+            body.put("flags", interactionCallbackDataFlags.stream()
+                    .mapToInt(InteractionCallbackDataFlag::getId).sum());
         }
     }
 
     private CompletableFuture<Message> checkForAttachmentsAndExecuteRequest(RestRequest<Message> request,
                                                                             ObjectNode body) {
-        if (!attachments.isEmpty() || (embeds.size() > 0 && embeds.get(0).requiresAttachments())) {
+        if (!attachments.isEmpty() || embeds.stream().anyMatch(EmbedBuilder::requiresAttachments)) {
             CompletableFuture<Message> future = new CompletableFuture<>();
             // We access files etc. so this should be async
             request.getApi().getThreadPool().getExecutorService().submit(() -> {
                 try {
                     List<FileContainer> tempAttachments = new ArrayList<>(attachments);
                     // Add the attachments required for the embed
-                    if (embeds.size() > 0) {
+                    for (EmbedBuilder embed : embeds) {
                         tempAttachments.addAll(
-                                ((EmbedBuilderDelegateImpl) embeds.get(0).getDelegate()).getRequiredAttachments());
+                                ((EmbedBuilderDelegateImpl) embed.getDelegate()).getRequiredAttachments());
                     }
 
                     addMultipartBodyToRequest(request, body, tempAttachments, request.getApi());

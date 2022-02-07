@@ -16,6 +16,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 
@@ -181,7 +182,7 @@ public class WebhookMessageBuilder {
      * @return The current instance in order to chain call methods.
      */
     public WebhookMessageBuilder addEmbeds(EmbedBuilder... embeds) {
-        delegate.addEmbeds(embeds);
+        delegate.addEmbeds(Arrays.asList(embeds));
         return this;
     }
 
@@ -234,8 +235,10 @@ public class WebhookMessageBuilder {
      * @param image The image to add as an attachment.
      * @param fileName The file name of the image.
      * @return The current instance in order to chain call methods.
+     * @deprecated Use {@link #addAttachment(BufferedImage, String)} instead.
      * @see #addAttachment(BufferedImage, String)
      */
+    @Deprecated
     public WebhookMessageBuilder addFile(BufferedImage image, String fileName) {
         delegate.addFile(image, fileName);
         return this;
@@ -246,8 +249,10 @@ public class WebhookMessageBuilder {
      *
      * @param file The file to add as an attachment.
      * @return The current instance in order to chain call methods.
+     * @deprecated Use {@link #addAttachment(File)} instead.
      * @see #addAttachment(File)
      */
+    @Deprecated
     public WebhookMessageBuilder addFile(File file) {
         delegate.addFile(file);
         return this;
@@ -258,8 +263,10 @@ public class WebhookMessageBuilder {
      *
      * @param icon The icon to add as an attachment.
      * @return The current instance in order to chain call methods.
+     * @deprecated Use {@link #addAttachment(Icon)} instead.
      * @see #addAttachment(Icon)
      */
+    @Deprecated
     public WebhookMessageBuilder addFile(Icon icon) {
         delegate.addFile(icon);
         return this;
@@ -270,8 +277,10 @@ public class WebhookMessageBuilder {
      *
      * @param url The url of the attachment.
      * @return The current instance in order to chain call methods.
+     * @deprecated Use {@link #addAttachment(URL)} instead.
      * @see #addAttachment(URL)
      */
+    @Deprecated
     public WebhookMessageBuilder addFile(URL url) {
         delegate.addFile(url);
         return this;
@@ -283,8 +292,10 @@ public class WebhookMessageBuilder {
      * @param bytes The bytes of the file.
      * @param fileName The name of the file.
      * @return The current instance in order to chain call methods.
+     * @deprecated Use {@link #addAttachment(byte[], String)} instead.
      * @see #addAttachment(byte[], String)
      */
+    @Deprecated
     public WebhookMessageBuilder addFile(byte[] bytes, String fileName) {
         delegate.addFile(bytes, fileName);
         return this;
@@ -296,8 +307,10 @@ public class WebhookMessageBuilder {
      * @param stream The stream of the file.
      * @param fileName The name of the file.
      * @return The current instance in order to chain call methods.
+     * @deprecated Use {@link #addAttachment(InputStream, String)} instead.
      * @see #addAttachment(InputStream, String)
      */
+    @Deprecated
     public WebhookMessageBuilder addFile(InputStream stream, String fileName) {
         delegate.addFile(stream, fileName);
         return this;
@@ -309,8 +322,10 @@ public class WebhookMessageBuilder {
      * @param image The image to add as an attachment.
      * @param fileName The file name of the image.
      * @return The current instance in order to chain call methods.
+     * @deprecated Use {@link #addAttachment(BufferedImage, String)} instead.
      * @see #addAttachmentAsSpoiler(BufferedImage, String)
      */
+    @Deprecated
     public WebhookMessageBuilder addFileAsSpoiler(BufferedImage image, String fileName) {
         delegate.addFile(image, "SPOILER_" + fileName);
         return this;
@@ -321,8 +336,10 @@ public class WebhookMessageBuilder {
      *
      * @param file The file to add as an attachment.
      * @return The current instance in order to chain call methods.
+     * @deprecated Use {@link #addAttachment(File)} instead.
      * @see #addAttachmentAsSpoiler(File)
      */
+    @Deprecated
     public WebhookMessageBuilder addFileAsSpoiler(File file) {
         delegate.addFileAsSpoiler(file);
         return this;
@@ -333,8 +350,10 @@ public class WebhookMessageBuilder {
      *
      * @param icon The icon to add as an attachment.
      * @return The current instance in order to chain call methods.
+     * @deprecated Use {@link #addAttachment(Icon)} instead.
      * @see #addAttachmentAsSpoiler(Icon)
      */
+    @Deprecated
     public WebhookMessageBuilder addFileAsSpoiler(Icon icon) {
         delegate.addFileAsSpoiler(icon);
         return this;
@@ -345,8 +364,10 @@ public class WebhookMessageBuilder {
      *
      * @param url The url of the attachment.
      * @return The current instance in order to chain call methods.
+     * @deprecated Use {@link #addAttachment(URL)} instead.
      * @see #addAttachment(URL)
      */
+    @Deprecated
     public WebhookMessageBuilder addFileAsSpoiler(URL url) {
         delegate.addFileAsSpoiler(url);
         return this;
@@ -358,8 +379,10 @@ public class WebhookMessageBuilder {
      * @param bytes The bytes of the file.
      * @param fileName The name of the file.
      * @return The current instance in order to chain call methods.
+     * @deprecated Use {@link #addAttachment(byte[], String)} instead.
      * @see #addAttachmentAsSpoiler(byte[], String)
      */
+    @Deprecated
     public WebhookMessageBuilder addFileAsSpoiler(byte[] bytes, String fileName) {
         delegate.addFile(bytes, "SPOILER_" + fileName);
         return this;
@@ -371,8 +394,10 @@ public class WebhookMessageBuilder {
      * @param stream The stream of the file.
      * @param fileName The name of the file.
      * @return The current instance in order to chain call methods.
+     * @deprecated Use {@link #addAttachment(InputStream, String)} instead.
      * @see #addAttachment(InputStream, String)
      */
+    @Deprecated
     public WebhookMessageBuilder addFileAsSpoiler(InputStream stream, String fileName) {
         delegate.addFile(stream, "SPOILER_" + fileName);
         return this;
@@ -648,7 +673,7 @@ public class WebhookMessageBuilder {
      * Sends the message without waiting for a response.
      *
      * @param webhook The webhook from which the message should be sent.
-     * @return A CompletableFuture indicating whether or not sending the request to discord was successful.
+     * @return A CompletableFuture indicating whether sending the request to discord was successful.
      */
     public CompletableFuture<Void> sendSilently(IncomingWebhook webhook) {
         return delegate.sendSilently(webhook);
@@ -660,7 +685,7 @@ public class WebhookMessageBuilder {
      * @param api The api instance needed to send the message.
      * @param webhookId The id of the webhook from which the message should be sent.
      * @param webhookToken The token of the webhook from which the message should be sent.
-     * @return A CompletableFuture indicating whether or not sending the request to discord was successful.
+     * @return A CompletableFuture indicating whether sending the request to discord was successful.
      */
     public CompletableFuture<Void> sendSilently(DiscordApi api, long webhookId, String webhookToken) {
         return delegate.sendSilently(api, Long.toUnsignedString(webhookId), webhookToken);
@@ -672,7 +697,7 @@ public class WebhookMessageBuilder {
      * @param api The api instance needed to send the message.
      * @param webhookId The id of the webhook from which the message should be sent.
      * @param webhookToken The token of the webhook from which the message should be sent.
-     * @return A CompletableFuture indicating whether or not sending the request to discord was successful.
+     * @return A CompletableFuture indicating whether sending the request to discord was successful.
      */
     public CompletableFuture<Void> sendSilently(DiscordApi api, String webhookId, String webhookToken) {
         return delegate.sendSilently(api, webhookId, webhookToken);
@@ -683,7 +708,7 @@ public class WebhookMessageBuilder {
      *
      * @param api The api instance needed to send the message.
      * @param webhookUrl The url of the webhook from which the message should be sent.
-     * @return A CompletableFuture indicating whether or not sending the request to discord was successful.
+     * @return A CompletableFuture indicating whether sending the request to discord was successful.
      * @throws IllegalArgumentException If the link isn't valid.
      */
     public CompletableFuture<Void> sendSilently(DiscordApi api, String webhookUrl) throws IllegalArgumentException {
