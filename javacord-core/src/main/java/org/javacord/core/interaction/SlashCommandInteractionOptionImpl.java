@@ -3,12 +3,14 @@ package org.javacord.core.interaction;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApi;
+import org.javacord.api.entity.Attachment;
 import org.javacord.api.entity.Mentionable;
 import org.javacord.api.entity.channel.ServerChannel;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.interaction.SlashCommandInteractionOption;
 import org.javacord.api.interaction.SlashCommandOptionType;
+import org.javacord.core.entity.AttachmentImpl;
 import org.javacord.core.util.logging.LoggerUtil;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,6 +36,7 @@ public class SlashCommandInteractionOptionImpl implements SlashCommandInteractio
     private final Long channelValue;
     private final Long roleValue;
     private final Long mentionableValue;
+    private final Attachment attachmentValue;
     /**
      * This is the NUMBER option according to the Discord docs.
      */
@@ -70,6 +73,7 @@ public class SlashCommandInteractionOptionImpl implements SlashCommandInteractio
         Long localRoleValue = null;
         Long localMentionableValue = null;
         Double localDecimalValue = null;
+        Attachment localAttachmentValue = null;
 
         final int typeInt = jsonData.get("type").asInt();
         final SlashCommandOptionType slashCommandOptionType = SlashCommandOptionType.fromValue(typeInt);
@@ -114,6 +118,10 @@ public class SlashCommandInteractionOptionImpl implements SlashCommandInteractio
                 localDecimalValue = valueNode.asDouble();
                 localStringRepresentation = String.valueOf(localDecimalValue);
                 break;
+            case ATTACHMENT:
+                localAttachmentValue = new AttachmentImpl(api, valueNode);
+                localStringRepresentation = String.valueOf(localAttachmentValue.getId());
+                break;
             default:
                 LOGGER.warn("Received slash command option of unknown type <{}>. "
                         + "Please contact the developer!", typeInt);
@@ -128,6 +136,7 @@ public class SlashCommandInteractionOptionImpl implements SlashCommandInteractio
         roleValue = localRoleValue;
         mentionableValue = localMentionableValue;
         decimalValue = localDecimalValue;
+        attachmentValue = localAttachmentValue;
     }
 
     @Override
@@ -176,6 +185,11 @@ public class SlashCommandInteractionOptionImpl implements SlashCommandInteractio
     public Optional<ServerChannel> getChannelValue() {
         return Optional.ofNullable(channelValue)
                 .flatMap(api::getServerChannelById);
+    }
+
+    @Override
+    public Optional<Attachment> getAttachmentValue() {
+        return Optional.ofNullable(attachmentValue);
     }
 
     @Override
